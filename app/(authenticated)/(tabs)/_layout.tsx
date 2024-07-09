@@ -3,12 +3,17 @@ import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
+import CustomHeader from "@/components/CustomHeader";
 
 const Layout = () => {
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors.primary,
+        tabBarStyle: {
+          height: 65,
+          paddingBottom: 7,
+        },
       }}
     >
       <Tabs.Screen
@@ -18,6 +23,7 @@ const Layout = () => {
           tabBarIcon: ({ size, color }) => (
             <Ionicons name="home-sharp" size={size} color={color} />
           ),
+          header: () => <CustomHeader />,
         }}
       />
       <Tabs.Screen

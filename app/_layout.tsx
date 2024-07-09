@@ -3,14 +3,36 @@ import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import { Link, Stack, useRouter, useSegments } from "expo-router";
+import {
+  Link,
+  Stack,
+  useNavigation,
+  useRootNavigationState,
+  useRouter,
+  useSegments,
+} from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Text, TouchableOpacity } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import * as SecureStore from "expo-secure-store";
+import { TamaguiProvider, createTamagui } from "@tamagui/core"; // or 'tamagui'
+import { config } from "@tamagui/config/v3";
+import "@tamagui/core/reset.css";
+import { PortalProvider } from "tamagui";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+
+// you usually export this from a tamagui.config.ts file
+const tamaguiConfig = createTamagui(config);
+
+// make TypeScript type everything based on your config
+type Conf = typeof tamaguiConfig;
+declare module "@tamagui/core" {
+  // or 'tamagui'
+  interface TamaguiCustomConfig extends Conf {}
+}
 
 const CLEARK_PUBLISHABLE_KEY =
   process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
@@ -45,6 +67,8 @@ SplashScreen.preventAutoHideAsync();
 const InitialLayout = () => {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    Inter: require("@tamagui/font-inter/otf/Inter-Medium.otf"),
+    InterBold: require("@tamagui/font-inter/otf/Inter-Bold.otf"),
     ...FontAwesome.font,
   });
 
@@ -63,7 +87,7 @@ const InitialLayout = () => {
     if (!isLoaded) return;
     const isAuthGroup = segments.includes("(authenticated)");
 
-    if (isSignedIn && !isAuthGroup) {
+    if (isSignedIn && isAuthGroup) {
       router.replace("/(authenticated)/(tabs)/home");
     } else if (!isSignedIn) {
       router.replace("/");
@@ -159,15 +183,21 @@ const InitialLayout = () => {
 
 const RootLayoutNav = () => {
   return (
-    <ClerkProvider
-      publishableKey={CLEARK_PUBLISHABLE_KEY!}
-      tokenCache={tokenCache}
-    >
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar style="light" />
-        <InitialLayout />
-      </GestureHandlerRootView>
-    </ClerkProvider>
+    <TamaguiProvider config={tamaguiConfig}>
+      <PortalProvider shouldAddRootHost>
+        <ClerkProvider
+          publishableKey={CLEARK_PUBLISHABLE_KEY!}
+          tokenCache={tokenCache}
+        >
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <BottomSheetModalProvider>
+              <StatusBar style="auto" />
+              <InitialLayout />
+            </BottomSheetModalProvider>
+          </GestureHandlerRootView>
+        </ClerkProvider>
+      </PortalProvider>
+    </TamaguiProvider>
   );
 };
 

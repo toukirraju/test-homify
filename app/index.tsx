@@ -33,7 +33,8 @@ const Page = () => {
 
       <View style={styles.buttons}>
         <Link
-          href={"/login"}
+          // href={"/login"}
+          href={"/(authenticated)/(tabs)/home"}
           asChild
           style={[
             defaultStyles.pillButton,
